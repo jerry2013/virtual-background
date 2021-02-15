@@ -31,6 +31,13 @@ function SourceViewer(props: SourceViewerProps) {
   useEffect(() => {
     async function getCameraStream() {
       try {
+        if (videoRef.current && videoRef.current.srcObject) {
+          const stream = videoRef.current.srcObject
+          if (stream instanceof MediaStream) {
+            // stop so gUM can get different height
+            stream.getVideoTracks()[0].stop()
+          }
+        }
         const constraint: MediaStreamConstraints = {
           video: { height: props.sourceConfig.resolution },
         }

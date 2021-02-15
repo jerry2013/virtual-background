@@ -13,18 +13,18 @@ function useStats() {
   // when the functions are called inside useEffect
 
   const beginFrame = useCallback(() => {
-    beginTimeRef.current = Date.now()
+    beginTimeRef.current = performance.now()
   }, [])
 
   const addFrameEvent = useCallback(() => {
-    const time = Date.now()
+    const time = performance.now()
     durationsRef.current[eventCount.current] = time - beginTimeRef.current
     beginTimeRef.current = time
     eventCount.current++
   }, [])
 
   const endFrame = useCallback(() => {
-    const time = Date.now()
+    const time = performance.now()
     durationsRef.current[eventCount.current] = time - beginTimeRef.current
     frameCountRef.current++
     if (time >= previousTimeRef.current + 1000) {

@@ -34,6 +34,13 @@ function PostProcessingConfigCard(props: PostProcessingConfigCardProps) {
     })
   }
 
+  function handleImageLayerChange(event: ChangeEvent<HTMLInputElement>) {
+    props.onChange({
+      ...props.config,
+      useImageLayer: event.target.checked,
+    })
+  }
+
   function handleSigmaSpaceChange(_event: any, value: number | number[]) {
     props.onChange({
       ...props.config,
@@ -138,16 +145,28 @@ function PostProcessingConfigCard(props: PostProcessingConfigCardProps) {
             </div>
           </React.Fragment>
         ) : (
-          <FormControlLabel
-            label="Smooth segmentation mask"
-            control={
-              <Switch
-                color="primary"
-                checked={props.config.smoothSegmentationMask}
-                onChange={handleSmoothSegmentationMaskChange}
-              />
-            }
-          />
+          <React.Fragment>
+            <FormControlLabel
+              label="Smooth segmentation mask"
+              control={
+                <Switch
+                  color="primary"
+                  checked={props.config.smoothSegmentationMask}
+                  onChange={handleSmoothSegmentationMaskChange}
+                />
+              }
+            />
+            <FormControlLabel
+              label="Use Image Layer for background"
+              control={
+                <Switch
+                  color="primary"
+                  checked={props.config.useImageLayer}
+                  onChange={handleImageLayerChange}
+                />
+              }
+            />
+          </React.Fragment>
         )}
       </CardContent>
     </Card>

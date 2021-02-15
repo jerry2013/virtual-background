@@ -3,7 +3,7 @@ import { BackgroundConfig } from '../../core/helpers/backgroundHelper'
 import { PostProcessingConfig } from '../../core/helpers/postProcessingHelper'
 import {
   inputResolutions,
-  SegmentationConfig,
+  SegmentationConfig
 } from '../../core/helpers/segmentationHelper'
 import { SourcePlayback } from '../../core/helpers/sourceHelper'
 import { TFLite } from '../../core/hooks/useTFLite'
@@ -17,7 +17,9 @@ export function buildCanvas2dPipeline(
   tflite: TFLite,
   addFrameEvent: () => void
 ) {
-  const ctx = canvas.getContext('2d')!
+  const ctx = canvas.getContext('2d', { desynchronized: true })!
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'low';
 
   const [segmentationWidth, segmentationHeight] = inputResolutions[
     segmentationConfig.inputResolution
@@ -140,10 +142,7 @@ export function buildCanvas2dPipeline(
     }
 
     ctx.drawImage(sourcePlayback.htmlElement, 0, 0)
-
-    if (backgroundConfig.type === 'blur') {
-      blurBackground()
-    }
+    blurBackground(backgroundConfig.type === 'blur')
   }
 
   function drawSegmentationMask() {
@@ -160,10 +159,17 @@ export function buildCanvas2dPipeline(
     )
   }
 
-  function blurBackground() {
+  function blurBackground(blur: boolean) {
     ctx.globalCompositeOperation = 'destination-over'
-    ctx.filter = 'blur(8px)' // FIXME Does not work on Safari
-    ctx.drawImage(sourcePlayback.htmlElement, 0, 0)
+    if (blur) {
+      ctx.filter = 'blur(8px)' // FIXME Does not work on Safari
+      ctx.drawImage(sourcePlayback.htmlElement, 0, 0)
+    } else if (!postProcessingConfig?.useImageLayer) {
+      const img = backgroundConfig.image;
+      if (img) {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      }
+    }
   }
 
   return { render, updatePostProcessingConfig, cleanUp }

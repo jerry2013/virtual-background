@@ -6,8 +6,13 @@ import { useEffect, useState } from 'react'
 import { BackgroundConfig } from '../helpers/backgroundHelper'
 import { PostProcessingConfig } from '../helpers/postProcessingHelper'
 import { SegmentationConfig } from '../helpers/segmentationHelper'
-import { SourceConfig, SourcePlayback } from '../helpers/sourceHelper'
+import {
+  SourceConfig,
+  SourcePlayback,
+  StreamPlayback,
+} from '../helpers/sourceHelper'
 import { TFLite } from '../hooks/useTFLite'
+import OutputStreamViewer from './OutputStreamViewer'
 import OutputViewer from './OutputViewer'
 import SourceViewer from './SourceViewer'
 
@@ -23,6 +28,7 @@ type ViewerCardProps = {
 function ViewerCard(props: ViewerCardProps) {
   const classes = useStyles()
   const [sourcePlayback, setSourcePlayback] = useState<SourcePlayback>()
+  const [streamPlayback, setStreamPlayback] = useState<StreamPlayback>()
 
   useEffect(() => {
     setSourcePlayback(undefined)
@@ -35,14 +41,20 @@ function ViewerCard(props: ViewerCardProps) {
         onLoad={setSourcePlayback}
       />
       {sourcePlayback && props.bodyPix && props.tflite ? (
-        <OutputViewer
-          sourcePlayback={sourcePlayback}
-          backgroundConfig={props.backgroundConfig}
-          segmentationConfig={props.segmentationConfig}
-          postProcessingConfig={props.postProcessingConfig}
-          bodyPix={props.bodyPix}
-          tflite={props.tflite}
-        />
+        <>
+          <OutputViewer
+            sourcePlayback={sourcePlayback}
+            backgroundConfig={props.backgroundConfig}
+            segmentationConfig={props.segmentationConfig}
+            postProcessingConfig={props.postProcessingConfig}
+            bodyPix={props.bodyPix}
+            tflite={props.tflite}
+            onLoad={setStreamPlayback}
+          />
+          {streamPlayback && (
+            <OutputStreamViewer streamPlayback={streamPlayback} />
+          )}
+        </>
       ) : (
         <div className={classes.noOutput}>
           <Avatar className={classes.avatar} />
@@ -63,12 +75,12 @@ const useStyles = makeStyles((theme: Theme) => {
 
       [theme.breakpoints.up('md')]: {
         gridColumnStart: 1,
-        gridColumnEnd: 3,
+        gridColumnEnd: 4,
       },
 
       [theme.breakpoints.up('lg')]: {
         gridRowStart: 1,
-        gridRowEnd: 3,
+        gridRowEnd: 4,
       },
     },
     noOutput: {

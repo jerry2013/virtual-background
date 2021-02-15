@@ -2,6 +2,7 @@ export type BlendMode = 'screen' | 'linearDodge'
 
 export type PostProcessingConfig = {
   smoothSegmentationMask: boolean
+  useImageLayer: boolean
   jointBilateralFilter: JointBilateralFilterConfig
   coverage: [number, number]
   lightWrapping: number

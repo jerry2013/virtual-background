@@ -20,10 +20,12 @@ function App() {
   const [sourceConfig, setSourceConfig] = useState<SourceConfig>({
     type: 'image',
     url: sourceImageUrls[0],
+    resolution: 360,
   })
   const [backgroundConfig, setBackgroundConfig] = useState<BackgroundConfig>({
     type: 'image',
     url: backgroundImageUrls[0],
+    image: Object.assign(new Image(), { src: backgroundImageUrls[0] }),
   })
   const [
     segmentationConfig,
@@ -38,7 +40,8 @@ function App() {
     postProcessingConfig,
     setPostProcessingConfig,
   ] = useState<PostProcessingConfig>({
-    smoothSegmentationMask: true,
+    smoothSegmentationMask: false,
+    useImageLayer: false,
     jointBilateralFilter: { sigmaSpace: 1, sigmaColor: 0.1 },
     coverage: [0.5, 0.75],
     lightWrapping: 0.3,
@@ -67,11 +70,13 @@ function App() {
         bodyPix={bodyPix}
         tflite={tflite}
       />
-      <SourceConfigCard config={sourceConfig} onChange={setSourceConfig} />
-      <BackgroundConfigCard
-        config={backgroundConfig}
-        onChange={setBackgroundConfig}
-      />
+      <div className={classes.pick}>
+        <SourceConfigCard config={sourceConfig} onChange={setSourceConfig} />
+        <BackgroundConfigCard
+          config={backgroundConfig}
+          onChange={setBackgroundConfig}
+        />
+      </div>
       <SegmentationConfigCard
         config={segmentationConfig}
         isSIMDSupported={isSIMDSupported}
@@ -110,6 +115,18 @@ const useStyles = makeStyles((theme: Theme) =>
     resourceSelectionCards: {
       display: 'flex',
       flexDirection: 'column',
+    },
+    pick: {
+      display: 'flex',
+      flexDirection: 'column',
+
+      [theme.breakpoints.up('xs')]: {
+        gap: theme.spacing(1),
+      },
+
+      [theme.breakpoints.up('md')]: {
+        gap: theme.spacing(2),
+      },
     },
   })
 )

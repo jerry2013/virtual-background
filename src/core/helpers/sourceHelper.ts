@@ -1,12 +1,17 @@
 export type SourceConfig = {
   type: 'image' | 'video' | 'camera'
   url?: string
+  resolution?: number
 }
 
 export type SourcePlayback = {
   htmlElement: HTMLImageElement | HTMLVideoElement
   width: number
   height: number
+}
+
+export type StreamPlayback = {
+  canvasElement: HTMLCanvasElement
 }
 
 export const sourceImageUrls = [

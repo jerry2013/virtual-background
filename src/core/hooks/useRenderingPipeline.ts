@@ -27,35 +27,41 @@ function useRenderingPipeline(
     let shouldRender = true
 
     let renderRequestId: number
+    let lastRenderTime = performance.now()
+    const frameDelay = 1000 / 30;
 
     const newPipeline =
       segmentationConfig.pipeline === 'webgl2'
         ? buildWebGL2Pipeline(
-            sourcePlayback,
-            backgroundImageRef.current,
-            backgroundConfig,
-            segmentationConfig,
-            canvasRef.current,
-            tflite,
-            addFrameEvent
-          )
+          sourcePlayback,
+          backgroundImageRef.current,
+          backgroundConfig,
+          segmentationConfig,
+          canvasRef.current,
+          tflite,
+          addFrameEvent
+        )
         : buildCanvas2dPipeline(
-            sourcePlayback,
-            backgroundConfig,
-            segmentationConfig,
-            canvasRef.current,
-            bodyPix,
-            tflite,
-            addFrameEvent
-          )
+          sourcePlayback,
+          backgroundConfig,
+          segmentationConfig,
+          canvasRef.current,
+          bodyPix,
+          tflite,
+          addFrameEvent
+        )
 
     async function render() {
       if (!shouldRender) {
         return
       }
-      beginFrame()
-      await newPipeline.render()
-      endFrame()
+      const now = performance.now();
+      if (now - lastRenderTime >= frameDelay) {
+        lastRenderTime = now;
+        beginFrame()
+        await newPipeline.render()
+        endFrame()
+      }
       renderRequestId = requestAnimationFrame(render)
     }
 

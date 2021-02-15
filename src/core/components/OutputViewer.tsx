@@ -5,7 +5,7 @@ import React, { useEffect } from 'react'
 import { BackgroundConfig } from '../helpers/backgroundHelper'
 import { PostProcessingConfig } from '../helpers/postProcessingHelper'
 import { SegmentationConfig } from '../helpers/segmentationHelper'
-import { SourcePlayback } from '../helpers/sourceHelper'
+import { SourcePlayback, StreamPlayback } from '../helpers/sourceHelper'
 import useRenderingPipeline from '../hooks/useRenderingPipeline'
 import { TFLite } from '../hooks/useTFLite'
 
@@ -16,6 +16,7 @@ type OutputViewerProps = {
   postProcessingConfig: PostProcessingConfig
   bodyPix: BodyPix
   tflite: TFLite
+  onLoad: (streamPlayback: StreamPlayback) => void
 }
 
 function OutputViewer(props: OutputViewerProps) {
@@ -34,19 +35,25 @@ function OutputViewer(props: OutputViewerProps) {
     props.tflite
   )
 
+  const { onLoad } = props
+
   useEffect(() => {
     if (pipeline) {
       pipeline.updatePostProcessingConfig(props.postProcessingConfig)
     }
   }, [pipeline, props.postProcessingConfig])
 
-  const statDetails = [
-    `resizing ${resizingDuration}ms`,
-    `inference ${inferenceDuration}ms`,
-    `post-processing ${postProcessingDuration}ms`,
-  ]
-  const stats = `${Math.round(fps)} fps (${statDetails.join(', ')})`
+  useEffect(() => {
+    onLoad({
+      canvasElement: canvasRef.current,
+    })
+  }, [onLoad, canvasRef, props.postProcessingConfig, props.segmentationConfig])
 
+  const statDetails: [string, number][] = [
+    ['resize', resizingDuration],
+    ['inference', inferenceDuration],
+    ['compose', postProcessingDuration],
+  ]
   return (
     <div className={classes.root}>
       {props.backgroundConfig.type === 'image' && (
@@ -55,7 +62,10 @@ function OutputViewer(props: OutputViewerProps) {
           className={classes.render}
           src={props.backgroundConfig.url}
           alt=""
-          hidden={props.segmentationConfig.pipeline === 'webgl2'}
+          hidden={
+            !props.postProcessingConfig.useImageLayer ||
+            props.segmentationConfig.pipeline === 'webgl2'
+          }
         />
       )}
       <canvas
@@ -68,7 +78,13 @@ function OutputViewer(props: OutputViewerProps) {
         height={props.sourcePlayback.height}
       />
       <Typography className={classes.stats} variant="caption">
-        {stats}
+        {`${canvasRef.current?.height}p ${Math.round(fps)}fps`}
+        <br />
+        {`${statDetails
+          .map(
+            ([key, val]) => `${key} ${val && val.toFixed(2).padStart(5, '0')}ms`
+          )
+          .join(', ')}`}
       </Typography>
     </div>
   )

@@ -1,3 +1,4 @@
+import { Typography } from '@material-ui/core'
 import CircularProgress from '@material-ui/core/CircularProgress'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
 import VideocamOffIcon from '@material-ui/icons/VideocamOff'
@@ -30,7 +31,9 @@ function SourceViewer(props: SourceViewerProps) {
   useEffect(() => {
     async function getCameraStream() {
       try {
-        const constraint = { video: true }
+        const constraint: MediaStreamConstraints = {
+          video: { height: props.sourceConfig.resolution },
+        }
         const stream = await navigator.mediaDevices.getUserMedia(constraint)
         if (videoRef.current) {
           videoRef.current.srcObject = stream
@@ -74,28 +77,38 @@ function SourceViewer(props: SourceViewerProps) {
     <div className={classes.root}>
       {isLoading && <CircularProgress />}
       {props.sourceConfig.type === 'image' ? (
-        <img
-          className={classes.sourcePlayback}
-          src={sourceUrl}
-          hidden={isLoading}
-          alt=""
-          onLoad={handleImageLoad}
-        />
+        <>
+          <img
+            className={classes.sourcePlayback}
+            src={sourceUrl}
+            hidden={isLoading}
+            alt=""
+            onLoad={handleImageLoad}
+          />
+          <Typography className={classes.stats} variant="caption">
+            Image Input
+          </Typography>
+        </>
       ) : isCameraError ? (
         <VideocamOffIcon fontSize="large" />
       ) : (
-        <video
-          ref={videoRef}
-          className={classes.sourcePlayback}
-          src={sourceUrl}
-          hidden={isLoading}
-          autoPlay
-          playsInline
-          controls={false}
-          muted
-          loop
-          onLoadedData={handleVideoLoad}
-        />
+        <>
+          <video
+            ref={videoRef}
+            className={classes.sourcePlayback}
+            src={sourceUrl}
+            hidden={isLoading}
+            autoPlay
+            playsInline
+            controls={false}
+            muted
+            loop
+            onLoadedData={handleVideoLoad}
+          />
+          <Typography className={classes.stats} variant="caption">
+            Video Input
+          </Typography>
+        </>
       )}
     </div>
   )
@@ -120,6 +133,15 @@ const useStyles = makeStyles((theme: Theme) =>
         borderRightStyle: 'solid',
         borderRightColor: theme.palette.divider,
       },
+    },
+    stats: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      left: 0,
+      textAlign: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.48)',
+      color: theme.palette.common.white,
     },
     sourcePlayback: {
       position: 'absolute',

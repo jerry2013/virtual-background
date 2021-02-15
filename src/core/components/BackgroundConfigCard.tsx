@@ -42,7 +42,13 @@ function BackgroundConfigCard(props: BackgroundConfigCardProps) {
             key={imageUrl}
             imageUrl={imageUrl}
             active={imageUrl === props.config.url}
-            onClick={() => props.onChange({ type: 'image', url: imageUrl })}
+            onClick={() =>
+              props.onChange({
+                type: 'image',
+                url: imageUrl,
+                image: Object.assign(new Image(), { src: imageUrl }),
+              })
+            }
           />
         ))}
       </CardContent>

@@ -27,10 +27,34 @@ function SourceConfigCard(props: SourceConfigCardProps) {
           Source
         </Typography>
         <SelectionIconButton
-          active={props.config.type === 'camera'}
-          onClick={() => props.onChange({ type: 'camera' })}
+          key={'360'}
+          active={
+            props.config.type === 'camera' && props.config.resolution === 360
+          }
+          onClick={() => props.onChange({ type: 'camera', resolution: 360 })}
         >
           <VideocamIcon />
+          360
+        </SelectionIconButton>
+        <SelectionIconButton
+          key={'540'}
+          active={
+            props.config.type === 'camera' && props.config.resolution === 540
+          }
+          onClick={() => props.onChange({ type: 'camera', resolution: 540 })}
+        >
+          <VideocamIcon />
+          540
+        </SelectionIconButton>
+        <SelectionIconButton
+          key={'720'}
+          active={
+            props.config.type === 'camera' && props.config.resolution === 720
+          }
+          onClick={() => props.onChange({ type: 'camera', resolution: 720 })}
+        >
+          <VideocamIcon />
+          720
         </SelectionIconButton>
         {sourceImageUrls.map((imageUrl) => (
           <ImageButton

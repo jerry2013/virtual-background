@@ -1,13 +1,13 @@
 import {
-  inputResolutions,
-  SegmentationConfig,
+  InputResolutions,
+  SegmentationConfig
 } from '../../core/helpers/segmentationHelper'
 import { TFLite } from '../../core/hooks/useTFLite'
 import {
   compileShader,
   createPiplelineStageProgram,
   createTexture,
-  glsl,
+  glsl
 } from '../helpers/webglHelper'
 
 export function buildSoftmaxStage(
@@ -41,9 +41,9 @@ export function buildSoftmaxStage(
   // TFLite memory will be accessed as float32
   const tfliteOutputMemoryOffset = tflite._getOutputMemoryOffset() / 4
 
-  const [segmentationWidth, segmentationHeight] = inputResolutions[
+  const [segmentationWidth, segmentationHeight] = InputResolutions[
     segmentationConfig.inputResolution
-  ]
+  ][1]
 
   const fragmentShader = compileShader(
     gl,

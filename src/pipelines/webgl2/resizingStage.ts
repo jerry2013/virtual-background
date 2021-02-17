@@ -1,6 +1,6 @@
 import {
-  inputResolutions,
-  SegmentationConfig,
+  InputResolutions,
+  SegmentationConfig
 } from '../../core/helpers/segmentationHelper'
 import { TFLite } from '../../core/hooks/useTFLite'
 import {
@@ -8,7 +8,7 @@ import {
   createPiplelineStageProgram,
   createTexture,
   glsl,
-  readPixelsAsync,
+  readPixelsAsync
 } from '../helpers/webglHelper'
 
 export function buildResizingStage(
@@ -37,9 +37,9 @@ export function buildResizingStage(
   // TFLite memory will be accessed as float32
   const tfliteInputMemoryOffset = tflite._getInputMemoryOffset() / 4
 
-  const [outputWidth, outputHeight] = inputResolutions[
+  const [outputWidth, outputHeight] = InputResolutions[
     segmentationConfig.inputResolution
-  ]
+  ][1]
   const outputPixelCount = outputWidth * outputHeight
 
   const fragmentShader = compileShader(

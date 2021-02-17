@@ -9,6 +9,7 @@ import Typography from '@material-ui/core/Typography'
 import { ChangeEvent } from 'react'
 import {
   InputResolution,
+  InputResolutions,
   PipelineName,
   SegmentationBackend,
   SegmentationConfig,
@@ -31,7 +32,7 @@ function SegmentationConfigCard(props: SegmentationConfigCardProps) {
     if (model === 'meet') {
       backend = 'wasm'
       if (inputResolution === '360p') {
-        inputResolution = '144p'
+        inputResolution = '144v2'
       }
     } else if (model === 'bodyPix') {
       backend = 'webgl'
@@ -122,18 +123,24 @@ function SegmentationConfigCard(props: SegmentationConfigCardProps) {
               value={props.config.inputResolution}
               onChange={handleInputResolutionChange}
             >
-              <MenuItem value="360p" disabled={props.config.model === 'meet'}>
-                360p
-              </MenuItem>
-              <MenuItem
-                value="144p"
-                disabled={props.config.model === 'bodyPix'}
-              >
-                144p
-              </MenuItem>
-              <MenuItem value="96p" disabled={props.config.model === 'bodyPix'}>
-                96p
-              </MenuItem>
+              {Object.keys(InputResolutions)
+                .sort((a, b) => parseInt(a, 10) - parseInt(b, 10))
+                .reverse()
+                .map((res: any) => {
+                  return (
+                    <MenuItem
+                      key={res}
+                      value={res}
+                      disabled={
+                        props.config.model === 'meet'
+                          ? res === '360p'
+                          : res !== '360p'
+                      }
+                    >
+                      {res}
+                    </MenuItem>
+                  )
+                })}
             </Select>
           </FormControl>
           <FormControl className={classes.formControl} variant="outlined">

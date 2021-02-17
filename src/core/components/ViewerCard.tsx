@@ -51,9 +51,7 @@ function ViewerCard(props: ViewerCardProps) {
             tflite={props.tflite}
             onLoad={setStreamPlayback}
           />
-          {streamPlayback && (
-            <OutputStreamViewer streamPlayback={streamPlayback} />
-          )}
+          <OutputStreamViewer streamPlayback={streamPlayback!} />
         </>
       ) : (
         <div className={classes.noOutput}>

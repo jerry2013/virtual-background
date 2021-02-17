@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { SegmentationConfig } from '../helpers/segmentationHelper'
+import { InputResolutions, SegmentationConfig } from '../helpers/segmentationHelper'
 
 declare function createTFLiteModule(): Promise<TFLite>
 declare function createTFLiteSIMDModule(): Promise<TFLite>
@@ -17,6 +17,8 @@ export interface TFLite extends EmscriptenModule {
   _loadModel(bufferSize: number): number
   _runInference(): number
 }
+
+let promise = Promise.resolve()
 
 function useTFLite(segmentationConfig: SegmentationConfig) {
   const [tflite, setTFLite] = useState<TFLite>()
@@ -61,41 +63,40 @@ function useTFLite(segmentationConfig: SegmentationConfig) {
         )
       }
 
-      const modelFileName =
-        segmentationConfig.inputResolution === '144p'
-          ? 'segm_full_v679'
-          : 'segm_lite_v681'
+      const modelFileName = InputResolutions[segmentationConfig.inputResolution][0];
       console.log('Loading meet model:', modelFileName)
 
       const modelResponse = await fetch(
         `${process.env.PUBLIC_URL}/models/${modelFileName}.tflite`
       )
+      if (!modelResponse.ok) {
+        throw new Error(`TFLite model unavailable`)
+      }
       const model = await modelResponse.arrayBuffer()
       console.log('Model buffer size:', model.byteLength)
 
       const modelBufferOffset = newSelectedTFLite._getModelBufferMemoryOffset()
       console.log('Model buffer memory offset:', modelBufferOffset)
-      console.log('Loading model buffer...')
       newSelectedTFLite.HEAPU8.set(new Uint8Array(model), modelBufferOffset)
-      console.log(
-        '_loadModel result:',
-        newSelectedTFLite._loadModel(model.byteLength)
-      )
+      const result = newSelectedTFLite._loadModel(model.byteLength)
+      console.log('_loadModel result:', result)
+
+      if (result !== 0) {
+        return
+      }
 
       console.log(
         'Input memory offset:',
         newSelectedTFLite._getInputMemoryOffset()
       )
-      console.log('Input height:', newSelectedTFLite._getInputHeight())
-      console.log('Input width:', newSelectedTFLite._getInputWidth())
+      console.log('Input dimension:', [newSelectedTFLite._getInputWidth(), newSelectedTFLite._getInputHeight()])
       console.log('Input channels:', newSelectedTFLite._getInputChannelCount())
 
       console.log(
         'Output memory offset:',
         newSelectedTFLite._getOutputMemoryOffset()
       )
-      console.log('Output height:', newSelectedTFLite._getOutputHeight())
-      console.log('Output width:', newSelectedTFLite._getOutputWidth())
+      console.log('Output height:', [newSelectedTFLite._getOutputWidth(), newSelectedTFLite._getOutputHeight()])
       console.log(
         'Output channels:',
         newSelectedTFLite._getOutputChannelCount()
@@ -104,14 +105,12 @@ function useTFLite(segmentationConfig: SegmentationConfig) {
       setSelectedTFLite(newSelectedTFLite)
     }
 
-    loadMeetModel()
+    promise = promise.then(() => loadMeetModel())
   }, [
     tflite,
     tfliteSIMD,
     isSIMDSupported,
-    segmentationConfig.model,
-    segmentationConfig.backend,
-    segmentationConfig.inputResolution,
+    segmentationConfig,
   ])
 
   return { tflite: selectedTFLite, isSIMDSupported }

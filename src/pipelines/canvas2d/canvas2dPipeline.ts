@@ -2,7 +2,7 @@ import { BodyPix } from '@tensorflow-models/body-pix'
 import { BackgroundConfig } from '../../core/helpers/backgroundHelper'
 import { PostProcessingConfig } from '../../core/helpers/postProcessingHelper'
 import {
-  inputResolutions,
+  InputResolutions,
   SegmentationConfig
 } from '../../core/helpers/segmentationHelper'
 import { SourcePlayback } from '../../core/helpers/sourceHelper'
@@ -21,9 +21,9 @@ export function buildCanvas2dPipeline(
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'low';
 
-  const [segmentationWidth, segmentationHeight] = inputResolutions[
+  const [segmentationWidth, segmentationHeight] = InputResolutions[
     segmentationConfig.inputResolution
-  ]
+  ][1]
   const segmentationPixelCount = segmentationWidth * segmentationHeight
   const segmentationMask = new ImageData(segmentationWidth, segmentationHeight)
   const segmentationMaskCanvas = document.createElement('canvas')
@@ -88,11 +88,9 @@ export function buildCanvas2dPipeline(
       )
 
       for (let i = 0; i < segmentationPixelCount; i++) {
-        tflite.HEAPF32[inputMemoryOffset + i * 3] = imageData.data[i * 4] / 255
-        tflite.HEAPF32[inputMemoryOffset + i * 3 + 1] =
-          imageData.data[i * 4 + 1] / 255
-        tflite.HEAPF32[inputMemoryOffset + i * 3 + 2] =
-          imageData.data[i * 4 + 2] / 255
+        for (let j = 0; j < 3; j++) {
+          tflite.HEAPF32[inputMemoryOffset + i * 3 + j] = imageData.data[i * 4 + j] / 255
+        }
       }
     }
   }
@@ -109,16 +107,23 @@ export function buildCanvas2dPipeline(
   function runTFLiteInference() {
     tflite._runInference()
 
+    const outputChannels = InputResolutions[segmentationConfig.inputResolution][2]
     for (let i = 0; i < segmentationPixelCount; i++) {
-      const background = tflite.HEAPF32[outputMemoryOffset + i * 2]
-      const person = tflite.HEAPF32[outputMemoryOffset + i * 2 + 1]
-      const shift = Math.max(background, person)
-      const backgroundExp = Math.exp(background - shift)
-      const personExp = Math.exp(person - shift)
-
+      let mask;
+      const pos = outputMemoryOffset + i * outputChannels
+      if (outputChannels === 1) {
+        const person = tflite.HEAPF32[pos]
+        mask = person;
+      } else {
+        const background = tflite.HEAPF32[pos]
+        const person = tflite.HEAPF32[pos + 1]
+        const shift = Math.max(background, person)
+        const backgroundExp = Math.exp(background - shift)
+        const personExp = Math.exp(person - shift)
+        mask = personExp / (backgroundExp + personExp) // softmax
+      }
       // Sets only the alpha component of each pixel
-      segmentationMask.data[i * 4 + 3] =
-        (255 * personExp) / (backgroundExp + personExp) // softmax
+      segmentationMask.data[i * 4 + 3] = 255 * mask;
     }
     segmentationMaskCtx.putImageData(segmentationMask, 0, 0)
   }

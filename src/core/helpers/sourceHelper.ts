@@ -11,7 +11,7 @@ export type SourcePlayback = {
 }
 
 export type StreamPlayback = {
-  canvasElement: HTMLCanvasElement
+  canvasStream: MediaStream
 }
 
 export const sourceImageUrls = [

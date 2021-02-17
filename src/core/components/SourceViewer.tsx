@@ -31,15 +31,8 @@ function SourceViewer(props: SourceViewerProps) {
   useEffect(() => {
     async function getCameraStream() {
       try {
-        if (videoRef.current && videoRef.current.srcObject) {
-          const stream = videoRef.current.srcObject
-          if (stream instanceof MediaStream) {
-            // stop so gUM can get different height
-            stream.getVideoTracks()[0].stop()
-          }
-        }
         const constraint: MediaStreamConstraints = {
-          video: { height: props.sourceConfig.resolution },
+          video: { height: { exact: props.sourceConfig.resolution } },
         }
         const stream = await navigator.mediaDevices.getUserMedia(constraint)
         if (videoRef.current) {
@@ -53,6 +46,13 @@ function SourceViewer(props: SourceViewerProps) {
       setCameraError(true)
     }
 
+    if (videoRef.current) {
+      const stream = videoRef.current.srcObject
+      if (stream && stream instanceof MediaStream) {
+        // stop so gUM can get different height
+        stream.getVideoTracks().forEach((t) => t.stop())
+      }
+    }
     if (props.sourceConfig.type === 'camera') {
       getCameraStream()
     } else if (videoRef.current) {

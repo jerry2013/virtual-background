@@ -45,7 +45,7 @@ function OutputViewer(props: OutputViewerProps) {
 
   useEffect(() => {
     onLoad({
-      canvasElement: canvasRef.current,
+      canvasStream: canvasRef.current && canvasRef.current.captureStream(30),
     })
   }, [onLoad, canvasRef, props.postProcessingConfig, props.segmentationConfig])
 

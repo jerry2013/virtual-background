@@ -1,11 +1,11 @@
 import {
-  inputResolutions,
-  SegmentationConfig,
+  InputResolutions,
+  SegmentationConfig
 } from '../../core/helpers/segmentationHelper'
 import {
   compileShader,
   createPiplelineStageProgram,
-  glsl,
+  glsl
 } from '../helpers/webglHelper'
 
 export function buildJointBilateralFilterStage(
@@ -70,9 +70,9 @@ export function buildJointBilateralFilterStage(
     }
   `
 
-  const [segmentationWidth, segmentationHeight] = inputResolutions[
+  const [segmentationWidth, segmentationHeight] = InputResolutions[
     segmentationConfig.inputResolution
-  ]
+  ][1]
   const { width: outputWidth, height: outputHeight } = canvas
   const texelWidth = 1 / outputWidth
   const texelHeight = 1 / outputHeight

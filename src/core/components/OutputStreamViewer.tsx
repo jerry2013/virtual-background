@@ -17,8 +17,8 @@ function OutputStreamViewer(props: OutputStreamViewerProps) {
 
   useEffect(() => {
     if (videoRef.current) {
-      const canvas = props.streamPlayback.canvasElement
-      videoRef.current.srcObject = canvas.captureStream(30)
+      videoRef.current.srcObject =
+        props.streamPlayback && props.streamPlayback.canvasStream
     }
   }, [props.streamPlayback])
 

@@ -1,8 +1,8 @@
 import { BackgroundConfig } from '../../core/helpers/backgroundHelper'
 import { PostProcessingConfig } from '../../core/helpers/postProcessingHelper'
 import {
-  inputResolutions,
-  SegmentationConfig,
+  InputResolutions,
+  SegmentationConfig
 } from '../../core/helpers/segmentationHelper'
 import { SourcePlayback } from '../../core/helpers/sourceHelper'
 import { TFLite } from '../../core/hooks/useTFLite'
@@ -10,7 +10,7 @@ import { compileShader, createTexture, glsl } from '../helpers/webglHelper'
 import { buildBackgroundBlurStage } from './backgroundBlurStage'
 import {
   BackgroundImageStage,
-  buildBackgroundImageStage,
+  buildBackgroundImageStage
 } from './backgroundImageStage'
 import { buildJointBilateralFilterStage } from './jointBilateralFilterStage'
 import { buildResizingStage } from './resizingStage'
@@ -39,11 +39,15 @@ export function buildWebGL2Pipeline(
   `
 
   const { width: frameWidth, height: frameHeight } = sourcePlayback
-  const [segmentationWidth, segmentationHeight] = inputResolutions[
+  const [segmentationWidth, segmentationHeight] = InputResolutions[
     segmentationConfig.inputResolution
-  ]
+  ][1]
 
   const gl = canvas.getContext('webgl2')!
+  if (!gl) {
+    // safari < TP114
+    return { render: async () => { }, updatePostProcessingConfig: () => { }, cleanUp: () => { } }
+  }
 
   const vertexShader = compileShader(gl, gl.VERTEX_SHADER, vertexShaderSource)
 
@@ -121,20 +125,20 @@ export function buildWebGL2Pipeline(
   const backgroundStage =
     backgroundConfig.type === 'blur'
       ? buildBackgroundBlurStage(
-          gl,
-          positionBuffer,
-          texCoordBuffer,
-          personMaskTexture,
-          canvas
-        )
+        gl,
+        positionBuffer,
+        texCoordBuffer,
+        personMaskTexture,
+        canvas
+      )
       : buildBackgroundImageStage(
-          gl,
-          positionBuffer,
-          texCoordBuffer,
-          personMaskTexture,
-          backgroundImage,
-          canvas
-        )
+        gl,
+        positionBuffer,
+        texCoordBuffer,
+        personMaskTexture,
+        backgroundImage,
+        canvas
+      )
 
   async function render() {
     gl.clearColor(0, 0, 0, 0)

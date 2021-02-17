@@ -33,14 +33,14 @@ function App() {
   ] = useState<SegmentationConfig>({
     model: 'meet',
     backend: 'wasm',
-    inputResolution: '96p',
-    pipeline: 'webgl2',
+    inputResolution: '96v2',
+    pipeline: 'canvas2dCpu',
   })
   const [
     postProcessingConfig,
     setPostProcessingConfig,
   ] = useState<PostProcessingConfig>({
-    smoothSegmentationMask: false,
+    smoothSegmentationMask: true,
     useImageLayer: false,
     jointBilateralFilter: { sigmaSpace: 1, sigmaColor: 0.1 },
     coverage: [0.5, 0.75],

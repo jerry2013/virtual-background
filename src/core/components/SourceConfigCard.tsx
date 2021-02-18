@@ -1,3 +1,4 @@
+import { TextField } from '@material-ui/core'
 import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent'
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles'
@@ -72,6 +73,16 @@ function SourceConfigCard(props: SourceConfigCardProps) {
             onClick={() => props.onChange({ type: 'video', url: videoUrl })}
           />
         ))}
+        <TextField
+          label="Image URL"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={props.config.url || ''}
+          onChange={(event) =>
+            props.onChange({ type: 'image', url: event.target.value })
+          }
+        />
       </CardContent>
     </Card>
   )

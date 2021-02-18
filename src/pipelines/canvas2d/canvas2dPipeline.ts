@@ -36,6 +36,8 @@ export function buildCanvas2dPipeline(
 
   let postProcessingConfig: PostProcessingConfig
 
+  const supportFilter = 'filter' in CanvasRenderingContext2D.prototype;
+
   async function render() {
     if (backgroundConfig.type !== 'none') {
       resizeSource()
@@ -129,25 +131,34 @@ export function buildCanvas2dPipeline(
   }
 
   function runPostProcessing() {
+    // Only the new shape is shown.
     ctx.globalCompositeOperation = 'copy'
-    ctx.filter = 'none'
-
-    if (postProcessingConfig?.smoothSegmentationMask) {
-      if (backgroundConfig.type === 'blur') {
-        ctx.filter = 'blur(8px)' // FIXME Does not work on Safari
-      } else if (backgroundConfig.type === 'image') {
-        ctx.filter = 'blur(4px)' // FIXME Does not work on Safari
-      }
-    }
 
     if (backgroundConfig.type !== 'none') {
+      if (postProcessingConfig?.smoothSegmentationMask) {
+        switch (backgroundConfig.type) {
+          case 'blur':
+            ctx.filter = 'blur(8px)' // FIXME Does not work on Safari
+            break;
+          case 'image':
+            ctx.filter = 'blur(4px)' // FIXME Does not work on Safari
+            break;
+          default: // 'none'
+            break;
+        }
+      }
       drawSegmentationMask()
+      // The new shape is drawn only where both the new shape and the
+      // destination canvas overlap. Everything else is made transparent.
       ctx.globalCompositeOperation = 'source-in'
-      ctx.filter = 'none'
     }
 
+    ctx.filter = 'none'
     ctx.drawImage(sourcePlayback.htmlElement, 0, 0)
-    blurBackground(backgroundConfig.type === 'blur')
+
+    if (backgroundConfig.type !== 'none') {
+      blurBackground(backgroundConfig.type === 'blur')
+    }
   }
 
   function drawSegmentationMask() {
@@ -165,13 +176,26 @@ export function buildCanvas2dPipeline(
   }
 
   function blurBackground(blur: boolean) {
+    // New shapes are drawn behind the existing canvas content.
     ctx.globalCompositeOperation = 'destination-over'
     if (blur) {
-      ctx.filter = 'blur(8px)' // FIXME Does not work on Safari
+      const radius = postProcessingConfig.jointBilateralFilter.sigmaSpace;
+      if (supportFilter) {
+        ctx.filter = `blur(${radius}px)` // FIXME Does not work on Safari
+      } else {
+        let r = 2;
+        do {
+          ctx.globalAlpha = r / 2 / radius;
+          ctx.drawImage(sourcePlayback.htmlElement, r, -r);
+          ctx.drawImage(sourcePlayback.htmlElement, -r, -r);
+          r *= 2;
+        } while (r <= radius * 2)
+        ctx.globalAlpha = 1;
+      }
       ctx.drawImage(sourcePlayback.htmlElement, 0, 0)
     } else if (!postProcessingConfig?.useImageLayer) {
       const img = backgroundConfig.image;
-      if (img) {
+      if (img && img.naturalHeight) {
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
       }
     }

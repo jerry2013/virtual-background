@@ -60,6 +60,19 @@ function App() {
     })
   }, [isSIMDSupported])
 
+  useEffect(() => {
+    setPostProcessingConfig((previousConfig) => {
+      let sigmaSpace = segmentationConfig.pipeline === 'canvas2dCpu' ? 4 : 1
+      return {
+        ...previousConfig,
+        jointBilateralFilter: {
+          ...previousConfig.jointBilateralFilter,
+          sigmaSpace,
+        },
+      }
+    })
+  }, [segmentationConfig.pipeline])
+
   return (
     <div className={classes.root}>
       <ViewerCard

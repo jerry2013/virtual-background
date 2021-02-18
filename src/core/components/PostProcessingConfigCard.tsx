@@ -91,7 +91,9 @@ function PostProcessingConfigCard(props: PostProcessingConfigCardProps) {
         {props.pipeline === 'webgl2' ? (
           <React.Fragment>
             <Typography gutterBottom>Joint bilateral filter</Typography>
-            <Typography variant="body2">Sigma space</Typography>
+            <Typography variant="body2">
+              Sigma space ({props.config.jointBilateralFilter.sigmaSpace})
+            </Typography>
             <Slider
               value={props.config.jointBilateralFilter.sigmaSpace}
               min={0}
@@ -100,7 +102,9 @@ function PostProcessingConfigCard(props: PostProcessingConfigCardProps) {
               valueLabelDisplay="auto"
               onChange={handleSigmaSpaceChange}
             />
-            <Typography variant="body2">Sigma color</Typography>
+            <Typography variant="body2">
+              Sigma color ({props.config.jointBilateralFilter.sigmaColor})
+            </Typography>
             <Slider
               value={props.config.jointBilateralFilter.sigmaColor}
               min={0}
@@ -110,7 +114,9 @@ function PostProcessingConfigCard(props: PostProcessingConfigCardProps) {
               onChange={handleSigmaColorChange}
             />
             <Typography gutterBottom>Background</Typography>
-            <Typography variant="body2">Coverage</Typography>
+            <Typography variant="body2">
+              Coverage ({props.config.coverage.join(' - ')})
+            </Typography>
             <Slider
               value={props.config.coverage}
               min={0}
@@ -120,7 +126,7 @@ function PostProcessingConfigCard(props: PostProcessingConfigCardProps) {
               onChange={handleCoverageChange}
             />
             <Typography variant="body2" gutterBottom>
-              Light wrapping
+              Light wrapping ({props.config.lightWrapping})
             </Typography>
             <div className={classes.lightWrapping}>
               <FormControl className={classes.formControl} variant="outlined">
@@ -165,6 +171,17 @@ function PostProcessingConfigCard(props: PostProcessingConfigCardProps) {
                   onChange={handleImageLayerChange}
                 />
               }
+            />
+            <Typography variant="body2">
+              Blur radius ({props.config.jointBilateralFilter.sigmaSpace})
+            </Typography>
+            <Slider
+              value={props.config.jointBilateralFilter.sigmaSpace}
+              min={4}
+              max={10}
+              step={1}
+              valueLabelDisplay="auto"
+              onChange={handleSigmaSpaceChange}
             />
           </React.Fragment>
         )}

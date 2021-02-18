@@ -89,6 +89,7 @@ function SourceViewer(props: SourceViewerProps) {
             className={classes.sourcePlayback}
             src={sourceUrl}
             hidden={isLoading}
+            crossOrigin="anonymous"
             alt=""
             onLoad={handleImageLoad}
           />
